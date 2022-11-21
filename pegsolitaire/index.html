@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="utf-8"/>
+    <title>Peg Solitaire</title>
+    <script src="pegsolitaire.js"></script>
+</head>
+
+<body>
+    <h1>Peg Solitaire</h1>
+
+    <script>
+        (function () {
+            var mjp = misohena.js_pegsolitaire;
+            mjp.getLastScriptNode().parentNode.appendChild(mjp.createGameBox({
+                boardText: mjp.getQueryParams()["p"],
+                enableShare: true,
+                scriptURL: "http://misohena.github.io/js_pegsolitaire/pegsolitaire.js"
+            }));
+            var vh = document.createElement('div');
+            vh.id = 'vh';
+            document.body.appendChild(vh);
+        })();
+    </script>
+
+</body>
+
+</html>
