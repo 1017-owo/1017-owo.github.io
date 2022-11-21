@@ -3,15 +3,8 @@ var movesarr = [];
     if (!global.misohena) { global.misohena = {}; }
     if (!global.misohena.js_pegsolitaire) { global.misohena.js_pegsolitaire = {}; }
     var mypkg = global.misohena.js_pegsolitaire;
-
-
-    //
-    // Model
-    //
-
     var INVALID_HOLE_ID = -1;
     var INVALID_DIR = -1;
-
     var MAX_BOARD_SIZE = 50;
 
     function BoardBase() {
@@ -679,8 +672,8 @@ var movesarr = [];
                 }
             };
         }
-        var MODE_PLAY = "Playing";
-        var MODE_EDIT = "Editing";
+        var MODE_PLAY = "遊玩中";
+        var MODE_EDIT = "編輯中";
         var modeObj = new PlayingMode();
         var modeName = MODE_PLAY;
         function setMode(modeStr) {
@@ -791,13 +784,13 @@ var movesarr = [];
 
         function updateStatus() {
             if (currentCanvas) {
-                spanMoves.innerHTML = "Moves:" + currentCanvas.pegsolitaire.history.getMoveCount();
+                spanMoves.innerHTML = "移動次數:" + currentCanvas.pegsolitaire.history.getMoveCount() + "，狀態:";
                 var board = currentCanvas.pegsolitaire.board;
                 spanGameState.innerHTML =
-                    currentCanvas.pegsolitaire.getMode() == currentCanvas.pegsolitaire.MODE_EDIT ? "Editing" :
-                        board.isSolved() ? "Solved!" :
-                            board.isEnd() ? "End Game" :
-                                "Playing";
+                    currentCanvas.pegsolitaire.getMode() == currentCanvas.pegsolitaire.MODE_EDIT ? "編輯中" :
+                        board.isSolved() ? "已解決!" :
+                            board.isEnd() ? "遊戲失敗" :
+                                "遊玩中";
             }
         }
 
