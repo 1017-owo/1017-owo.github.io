@@ -403,16 +403,16 @@ var movesarr = [];
     mypkg.createHexagonal5Board = createHexagonal5Board;
     function createHexagonal5Board() {
         var board = new HexGridBoard(9, 9);
-        board.fillRect(2,0,5,1, true);
-        board.fillRect(1,1,6,1, true);
-        board.fillRect(1,2,7,1, true);
-        board.fillRect(0,3,8,1, true);
-        board.fillRect(0,4,9,1, true);
-        board.fillRect(0,5,8,1, true);
-        board.fillRect(1,6,7,1, true);
-        board.fillRect(1,7,6,1, true);
-        board.fillRect(2,8,5,1, true);
-        board.pullPeg(board.xy(4,4));
+        board.fillRect(2, 0, 5, 1, true);
+        board.fillRect(1, 1, 6, 1, true);
+        board.fillRect(1, 2, 7, 1, true);
+        board.fillRect(0, 3, 8, 1, true);
+        board.fillRect(0, 4, 9, 1, true);
+        board.fillRect(0, 5, 8, 1, true);
+        board.fillRect(1, 6, 7, 1, true);
+        board.fillRect(1, 7, 6, 1, true);
+        board.fillRect(2, 8, 5, 1, true);
+        board.pullPeg(board.xy(4, 4));
         return board;
     }
 
@@ -485,12 +485,12 @@ var movesarr = [];
             if (draggingPeg && holeId == draggingPeg.getDstHoleId() && board.canMoveFromTo(draggingPeg.getHoleId(), holeId)) {
                 ctx.strokeStyle = "red";
                 ctx.lineWidth = 3;
-                ctx.fillText(holeId,holeX,holeY+2.5);
+                ctx.fillText(holeId, holeX, holeY + 2.5);
             }
             else {
                 ctx.strokeStyle = "black";
                 ctx.lineWidth = 1;
-                ctx.fillText(holeId,holeX,holeY+2.5);
+                ctx.fillText(holeId, holeX, holeY + 2.5);
             }
             ctx.stroke();
         });
@@ -510,7 +510,7 @@ var movesarr = [];
                 ctx.fill();
                 ctx.beginPath();
                 ctx.fillStyle = "white"
-                ctx.fillText(holeId,pegX,pegY+2.5);
+                ctx.fillText(holeId, pegX, pegY + 2.5);
                 ctx.fill();
             }
         });
@@ -748,18 +748,12 @@ var movesarr = [];
         if (!opt) {
             opt = {};
         }
-
         var catalog = opt.catalog || getBoardCatalog();
         if (opt.boardText) {
             catalog.splice(0, 0, { id: "Default", ctor: function () { return parseBoard(opt.boardText); }, title: "Default" });
         }
-
         var gameDiv = newElem("div");
-
-        // control
-
         var controlDiv = newElem("div", gameDiv);
-
         var boardCtors = {};
         var selectBoard = null;
         if (!opt.disableNewGame) {
@@ -767,9 +761,6 @@ var movesarr = [];
         }
         if (!opt.disableUndo) {
             newButton(controlDiv, "撤銷", undo);
-        }
-        if (!opt.disableEdit) {
-            newButton(controlDiv, "編輯", edit);
         }
         if (!opt.disableEdit) {
             newButton(controlDiv, "導入", ipt);
@@ -781,7 +772,6 @@ var movesarr = [];
         var spanMoves = newElem("span", statusDiv);
         statusDiv.appendChild(document.createTextNode(" "));
         var spanGameState = newElem("span", statusDiv);
-
         function updateStatus() {
             if (currentCanvas) {
                 spanMoves.innerHTML = "移動次數:" + currentCanvas.pegsolitaire.history.getMoveCount() + "，狀態:";
@@ -797,7 +787,6 @@ var movesarr = [];
         // canvas
 
         var currentCanvas = null;
-
         function newBoard(board) {
             if (board) {
                 var newCanvas = createCanvasView(board);
@@ -815,12 +804,12 @@ var movesarr = [];
             }
         }
         function newGame() {
-            document.getElementById('vh').innerHTML = '';
-            movesarr = [];
             var creator =
                 selectBoard ? boardCtors[selectBoard.value] :
                     catalog.length > 0 ? catalog[0].ctor :
                         null;
+            if(document.querySelector('#vh') !== null)document.getElementById('vh').innerHTML = '';
+            movesarr = [];
             if (creator) {
                 newBoard(creator());
             }
@@ -840,182 +829,13 @@ var movesarr = [];
         async function ipt() {
             newGame();
             var board = currentCanvas.pegsolitaire.board;
-            for(i=0;i<movesarr.length;i++){
-                board.movePeg(movesarr[i].from,movesarr[i].to);
+            for (i = 0; i < movesarr.length; i++) {
+                board.movePeg(movesarr[i].from, movesarr[i].to);
                 await delay(1);
-                updateStatus();             
-            }
-            
-        }
-
-        // Editor
-        var editorDiv = null;
-        function edit() {
-            currentCanvas.pegsolitaire.setMode(currentCanvas.pegsolitaire.MODE_EDIT);
-            updateStatus();
-
-            if (editorDiv) {
-                return;
-            }
-
-            editorDiv = newElem("div", gameDiv);
-            newButton(editorDiv, "Play", function () {
-                currentCanvas.pegsolitaire.setMode(currentCanvas.pegsolitaire.MODE_PLAY);
                 updateStatus();
-                editorDiv.parentNode.removeChild(editorDiv);
-                editorDiv = null;
-            });
-            if (opt.enableShare) {
-                newButton(editorDiv, "Share", function () {
-                    var dlg = newElem("div", editorDiv);
-                    dlg.appendChild(newTextNode("Share:"));
-                    newElem("br", dlg);
-                    dlg.appendChild(newTextNode("URL:"));
-                    newElem("br", dlg);
-                    var pageURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                    var urlText = newElem("input", dlg);
-                    urlText.setAttribute("type", "text");
-                    urlText.value = pageURL + "?p=" + currentCanvas.pegsolitaire.board.toString().replace(/ /g, "+");
-                    newElem("br", dlg);
-                    if (opt.scriptURL) {
-                        dlg.appendChild(newTextNode("Embed Script:"));
-                        newElem("br", dlg);
-                        var embedText = newElem("textarea", dlg);
-                        embedText.setAttribute("rows", "2");
-                        embedText.value =
-                            "<script src='" + opt.scriptURL + "'></script>\n" +
-                            "<script>misohena.js_pegsolitaire.insertGameBoxBeforeCurrentScript({\n" +
-                            "  boardText:'" + currentCanvas.pegsolitaire.board.toString() + "'\n" +
-                            "});\n" +
-                            "</script>";
-                        newElem("br", dlg);
-                    }
-                    newButton(dlg, "Close", function () {
-                        closeDlg();
-                    });
-                    function closeDlg() {
-                        dlg.parentNode.removeChild(dlg);
-                    }
-                });
             }
-            newButton(editorDiv, "Export", function () {
-                var dlg = newElem("div", editorDiv);
-                dlg.appendChild(document.createTextNode("Export:"));
-                var text = newElem("input", dlg);
-                text.setAttribute("type", "text");
-                text.value = currentCanvas.pegsolitaire.board.toString();
-                newButton(dlg, "Close", function () {
-                    closeDlg();
-                });
-                function closeDlg() {
-                    dlg.parentNode.removeChild(dlg);
-                }
-            });
-            newButton(editorDiv, "Import", function () {
-                var dlg = newElem("div", editorDiv);
-                dlg.appendChild(document.createTextNode("Import:"));
-                var text = newElem("input", dlg);
-                text.setAttribute("type", "text");
-                newButton(dlg, "OK", function () {
-                    importBoard(text.value);
-                    closeDlg();
-                });
-                newButton(dlg, "Cancel", closeDlg);
-                function importBoard(str) {
-                    newBoard(parseBoard(str));
-                }
-                function closeDlg() {
-                    dlg.parentNode.removeChild(dlg);
-                }
-            });
-            newButton(editorDiv, "Clear History", function () {
-                if (currentCanvas) {
-                    currentCanvas.pegsolitaire.history.clear();
-                    updateStatus();
-                }
-            });
-            newButton(editorDiv, "Clear Board", function () {
-                if (currentCanvas) {
-                    currentCanvas.pegsolitaire.board.clear();
-                    currentCanvas.pegsolitaire.update();
-                    updateStatus();
-                }
-            });
-            newButton(editorDiv, "Resize", function () {
-                var BOARD_TYPES = [
-                    { id: RectangularBoard.TYPEID, title: "Rectangular", pget: function (b) { return ["w", b.getWidth(), "h", b.getHeight()]; }, creator: function (props) { return new RectangularBoard(props.w, props.h); } },
-                    { id: HexGridBoard.TYPEID, title: "HexGrid", pget: function (b) { return ["w", b.getWidth(), "h", b.getHeight()]; }, creator: function (props) { return new HexGridBoard(props.w, props.h); } },
-                    { id: TriangularBoard.TYPEID, title: "Triangular", pget: function (b) { return ["size", b.getSize()]; }, creator: function (props) { return new TriangularBoard(props.size); } }
-                ];
-                var BOARD_TYPES_DIC = {};
 
-                var dlg = newElem("div", editorDiv);
-                dlg.appendChild(document.createTextNode("Resize:"));
-                var selectType = newElem("select", dlg);
-                for (var oi = 0; oi < BOARD_TYPES.length; ++oi) {
-                    var bt = BOARD_TYPES[oi];
-                    BOARD_TYPES_DIC[bt.id] = bt;
-                    var option = newElem("option", selectType);
-                    option.setAttribute("value", bt.id);
-                    option.appendChild(newTextNode(bt.title));
-                }
-                selectType.addEventListener("change", function (ev) {
-                    updatePropElem();
-                }, false);
-                var propElem = newElem("span", dlg);
-                var propInputs = [];
-                var currBoardType = null;
-                function updatePropElem() {
-                    var newBoardType = BOARD_TYPES_DIC[selectType.value];
-                    if (!newBoardType) {
-                        return;
-                    }
-                    while (propElem.firstChild) { propElem.removeChild(propElem.firstChild); }
-
-                    var props = newBoardType.pget(currentCanvas.pegsolitaire.board);
-                    props.push("dx");
-                    props.push(0);
-                    props.push("dy");
-                    props.push(0);
-                    var inputs = [];
-
-                    for (var pi = 0; pi < props.length; pi += 2) {
-                        propElem.appendChild(newTextNode(props[pi] + ":"));
-                        var input = newElem("input", propElem);
-                        input.setAttribute("type", "number");
-                        input.style.width = "3em";
-                        input.value = props[pi + 1];
-                        inputs.push({ name: props[pi], elem: input });
-                    }
-                    propInputs = inputs;
-                    currBoardType = newBoardType;
-                }
-                selectType.value = currentCanvas.pegsolitaire.board.getType();
-                updatePropElem();
-
-                newButton(dlg, "OK", function () {
-                    if (!currBoardType) {
-                        return;
-                    }
-                    var props = {};
-                    for (var ii = 0; ii < propInputs.length; ++ii) {
-                        props[propInputs[ii].name] = parseInt(propInputs[ii].elem.value, 10);
-                    }
-                    var board = currBoardType.creator(props);
-                    board.copyFrom(currentCanvas.pegsolitaire.board, -props.dx, -props.dy);
-
-                    newBoard(board);
-                    currentCanvas.pegsolitaire.setMode(currentCanvas.pegsolitaire.MODE_EDIT);
-                    closeDlg();
-                });
-                newButton(dlg, "Cancel", closeDlg);
-
-                function closeDlg() {
-                    dlg.parentNode.removeChild(dlg);
-                }
-            });
         }
-
         newGame();
         return gameDiv;
     }
@@ -1027,8 +847,6 @@ var movesarr = [];
         script.parentNode.insertBefore(gameBox, script);
         return gameBox;
     }
-
-
     //
     // HTML Utility
     //
@@ -1038,12 +856,10 @@ var movesarr = [];
         while (n && n.nodeName.toLowerCase() != "script") { n = n.lastChild; }
         return n;
     }
-
     function getMouseEventPositionOnElement(elem, ev) {
         var rect = elem.getBoundingClientRect();
         return { x: ev.clientX - rect.left, y: ev.clientY - rect.top };
     }
-
     function newElem(tagName, parentNode) {
         var elem = document.createElement(tagName);
         if (parentNode) {
@@ -1061,7 +877,6 @@ var movesarr = [];
     function newTextNode(text) {
         return document.createTextNode(text);
     }
-
     mypkg.getQueryParams = getQueryParams;
     function getQueryParams() {
         var result = {};
