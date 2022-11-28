@@ -311,10 +311,6 @@ var movesarr = [];
 
     mypkg.HexGridBoard = HexGridBoard;
     function HexGridBoard(w, h, holes) {
-        // ex)w=4,h=3
-        // 0  1  2  3
-        //  4  5  6  7
-        // 8  9 10 11
         RectangularBoard.call(this, w, h, holes);
 
         // Board Interface
@@ -541,8 +537,8 @@ var movesarr = [];
                 canvas.getContext("2d"),
                 board,
                 opt,
-                draggingPeg,
-                getMode() == MODE_EDIT ? true : false);
+                draggingPeg
+            )
         }
 
         //
@@ -585,7 +581,6 @@ var movesarr = [];
             this.getDeltaY = function () { return deltaPos.y; };
             this.getDstHoleId = function () { return dstHoleId; };
         }
-
         function mousePosToHoleId(xy, includingInvalidHoles) {
             return board.findHoleAtPosition(
                 (xy.x - opt.paddingLeft) / opt.holeSpanX,
@@ -593,7 +588,6 @@ var movesarr = [];
                 undefined,
                 includingInvalidHoles);
         }
-
         function PlayingMode() {
             this.leaveMode = function () {
                 this.onMouseLeave();
@@ -631,56 +625,12 @@ var movesarr = [];
                 }
             };
         }
-        function EditingMode() {
-            var lastHoleState = null;
-
-            this.leaveMode = function () {
-                this.onMouseLeave();
-            };
-            this.onMouseDown = function (ev) {
-                var pos = getMouseEventPositionOnElement(canvas, ev);
-                var holeId = mousePosToHoleId(pos, true);
-                if (holeId >= 0 && holeId < board.getHoleCount()) {
-                    var oldHoleState = board.getHoleState(holeId);
-                    var newHoleState =
-                        oldHoleState === undefined ? true :
-                            oldHoleState === true ? false :
-                                undefined;
-                    board.setHoleState(holeId, newHoleState);
-                    update();
-                    lastHoleState = newHoleState;
-                }
-            };
-            this.onMouseMove = function (ev) {
-                if (lastHoleState !== null) {
-                    var pos = getMouseEventPositionOnElement(canvas, ev);
-                    var holeId = mousePosToHoleId(pos, true);
-                    if (holeId >= 0 && holeId < board.getHoleCount()) {
-                        board.setHoleState(holeId, lastHoleState);
-                        update();
-                    }
-                }
-            };
-            this.onMouseUp = function (ev) {
-                if (lastHoleState !== null) {
-                    lastHoleState = null;
-                }
-            };
-            this.onMouseLeave = function (ev) {
-                if (lastHoleState !== null) {
-                    lastHoleState = null;
-                }
-            };
-        }
         var MODE_PLAY = "遊玩中";
-        var MODE_EDIT = "編輯中";
         var modeObj = new PlayingMode();
         var modeName = MODE_PLAY;
         function setMode(modeStr) {
             var modeCtor =
-                modeStr == MODE_PLAY ? PlayingMode :
-                    modeStr == MODE_EDIT ? EditingMode :
-                        null;
+                modeStr == MODE_PLAY ? PlayingMode : null;
             if (!modeCtor) {
                 return;
             }
@@ -689,28 +639,14 @@ var movesarr = [];
             modeName = modeStr;
             update();
         }
-        function getMode() {
-            return modeName;
-        }
-
-
+        function getMode() { return modeName; }
         function onMouseDown(ev) { modeObj.onMouseDown(ev); }
         function onMouseMove(ev) { modeObj.onMouseMove(ev); }
         function onMouseUp(ev) { modeObj.onMouseUp(ev); }
         function onMouseLeave(ev) { modeObj.onMouseLeave(ev); }
-        function onTouchStart(ev) {
-            onMouseDown(ev.touches[0]);
-            ev.preventDefault();
-        }
-        function onTouchMove(ev) {
-            onMouseMove(ev.touches[0]);
-            ev.preventDefault();
-        }
-        function onTouchEnd(ev) {
-            onMouseUp();
-            ev.preventDefault();
-        }
-
+        function onTouchStart(ev) { onMouseDown(ev.touches[0]);ev.preventDefault(); }
+        function onTouchMove(ev) { onMouseMove(ev.touches[0]);ev.preventDefault(); }
+        function onTouchEnd(ev) { onMouseUp();ev.preventDefault(); }
         canvas.addEventListener("mousedown", onMouseDown, false);
         canvas.addEventListener("mousemove", onMouseMove, false);
         canvas.addEventListener("mouseup", onMouseUp, false);
@@ -728,8 +664,7 @@ var movesarr = [];
             board: board,
             setMode: setMode,
             getMode: getMode,
-            MODE_PLAY: MODE_PLAY,
-            MODE_EDIT: MODE_EDIT
+            MODE_PLAY: MODE_PLAY
         };
 
         update();
@@ -753,34 +688,27 @@ var movesarr = [];
             catalog.splice(0, 0, { id: "Default", ctor: function () { return parseBoard(opt.boardText); }, title: "Default" });
         }
         var gameDiv = newElem("div");
+        gameDiv.id = "gc"
         var controlDiv = newElem("div", gameDiv);
         var boardCtors = {};
         var selectBoard = null;
         if (!opt.disableNewGame) {
-            newButton(controlDiv, "重試", newGame);
+            newButton(controlDiv, "重試", newGame); 
         }
         if (!opt.disableUndo) {
             newButton(controlDiv, "撤銷", undo);
-        }
-        if (!opt.disableEdit) {
-            newButton(controlDiv, "導入", ipt);
         }
 
         // status
 
         var statusDiv = newElem("div", gameDiv);
         var spanMoves = newElem("span", statusDiv);
+        spanMoves.id = 'moves'
         statusDiv.appendChild(document.createTextNode(" "));
         var spanGameState = newElem("span", statusDiv);
         function updateStatus() {
             if (currentCanvas) {
-                spanMoves.innerHTML = "移動次數:" + currentCanvas.pegsolitaire.history.getMoveCount() + "，狀態:";
-                var board = currentCanvas.pegsolitaire.board;
-                spanGameState.innerHTML =
-                    currentCanvas.pegsolitaire.getMode() == currentCanvas.pegsolitaire.MODE_EDIT ? "編輯中" :
-                        board.isSolved() ? "已解決!" :
-                            board.isEnd() ? "遊戲失敗" :
-                                "遊玩中";
+                spanMoves.innerHTML = "移動次數:" + currentCanvas.pegsolitaire.history.getMoveCount();
             }
         }
 
@@ -790,15 +718,8 @@ var movesarr = [];
         function newBoard(board) {
             if (board) {
                 var newCanvas = createCanvasView(board);
-                if (currentCanvas) {
-                    currentCanvas.parentNode.insertBefore(newCanvas, currentCanvas);
-                    currentCanvas.parentNode.removeChild(currentCanvas);
-                }
-                else {
-                    gameDiv.appendChild(newCanvas);
-                }
+                (currentCanvas) ? (currentCanvas.parentNode.insertBefore(newCanvas, currentCanvas) ,currentCanvas.parentNode.removeChild(currentCanvas)) : (gameDiv.appendChild(newCanvas))
                 currentCanvas = newCanvas;
-
                 currentCanvas.addEventListener("boardmoved", onBoardMoved, false);
                 updateStatus();
             }
@@ -820,22 +741,7 @@ var movesarr = [];
                 updateStatus();
             }
         }
-        function onBoardMoved(ev) {
-            updateStatus();
-        }
-        const delay = (delayInms) => {
-            return new Promise(resolve => setTimeout(resolve, delayInms));
-        }
-        async function ipt() {
-            newGame();
-            var board = currentCanvas.pegsolitaire.board;
-            for (i = 0; i < movesarr.length; i++) {
-                board.movePeg(movesarr[i].from, movesarr[i].to);
-                await delay(1);
-                updateStatus();
-            }
-
-        }
+        function onBoardMoved(ev) { updateStatus(); }
         newGame();
         return gameDiv;
     }
