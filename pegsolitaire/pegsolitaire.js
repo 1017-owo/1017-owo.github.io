@@ -815,6 +815,8 @@ var movesarr = [];
             }
         }
         function newGame() {
+            document.getElementById('vh').innerHTML = '';
+            movesarr = [];
             var creator =
                 selectBoard ? boardCtors[selectBoard.value] :
                     catalog.length > 0 ? catalog[0].ctor :
