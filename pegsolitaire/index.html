@@ -2,51 +2,17 @@
 <html lang="zh-TW">
 
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>孔明棋</title>
     <script src="pegsolitaire.js"></script>
-    <style>
-        input[value="重試"] {
-            border-radius: 5px;
-            background-color: #e43434;
-            color: #fff;
-            padding: 2px 10px;
-            line-height: 37px;
-            text-align: center;
-            font-size: 18px;
-            border: 0;
-            outline: 0;
-            margin: 0 0 0 8px;
-        }
-
-        input[value="撤銷"] {
-            border-radius: 5px;
-            background-color: #3485e4;
-            color: #fff;
-            padding: 2px 10px;
-            line-height: 37px;
-            text-align: center;
-            font-size: 18px;
-            border: 0;
-            margin: 0 0 0 8px;
-            outline: 0;
-        }
-
-        input[type="button"] {
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="./index.css" />
 </head>
 
 <body>
     <script>
         (function () {
             var mjp = misohena.js_pegsolitaire;
-            mjp.getLastScriptNode().parentNode.appendChild(mjp.createGameBox({
-                boardText: mjp.getQueryParams()["p"],
-                enableShare: true,
-                scriptURL: "http://misohena.github.io/js_pegsolitaire/pegsolitaire.js"
-            }));
+            mjp.getLastScriptNode().parentNode.appendChild(mjp.createGameBox());
             var vh = document.createElement('div');
             vh.id = 'vh';
             document.body.appendChild(vh);
