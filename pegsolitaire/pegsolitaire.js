@@ -257,21 +257,11 @@ var movesarr = [];
             }
             return INVALID_HOLE_ID;
         };
-        this.getDirCount = function () {
-            return 4;
-        };
-        this.getHoleLayoutPositionX = function (holeId) {
-            return toX(holeId);
-        };
-        this.getHoleLayoutPositionY = function (holeId) {
-            return toY(holeId);
-        };
-        this.getLayoutSizeX = function () {
-            return w - 1;
-        };
-        this.getLayoutSizeY = function () {
-            return h - 1;
-        };
+        this.getDirCount = function () { return 4; };
+        this.getHoleLayoutPositionX = function (holeId) { return toX(holeId); };
+        this.getHoleLayoutPositionY = function (holeId) { return toY(holeId); };
+        this.getLayoutSizeX = function () { return w - 1; };
+        this.getLayoutSizeY = function () { return h - 1; };
         this.getWidth = function () { return w; };
         this.getHeight = function () { return h; };
         this.getSize = function () { return Math.max(w, h); };
@@ -396,6 +386,7 @@ var movesarr = [];
         }
     }
 
+    // 圖形
     mypkg.createHexagonal5Board = createHexagonal5Board;
     function createHexagonal5Board() {
         var board = new HexGridBoard(9, 9);
@@ -411,16 +402,22 @@ var movesarr = [];
         board.pullPeg(board.xy(4, 4));
         return board;
     }
+    // 圖形
 
+    // 歷史紀錄
     mypkg.History = History;
     function History() {
         var moves = [];
-        this.add = function (from, to) {
-            movesarr.push({ from: from, to: to });
-            moves.push({ from: from, to: to });
-            var movehtml = document.createElement('div');
-            movehtml.innerHTML = `( ${from} , ${to} )`;
+        var movestr = '';
+        var movehtml = document.createElement('div');
+        window.onload = function () {
             document.getElementById('vh').appendChild(movehtml)
+        }
+        this.add = function (from, to) {
+            movesarr.push(from, to);
+            moves.push({ from: from, to: to });
+            movestr = movesarr.join(',');
+            movehtml.innerHTML = `${movestr}`;
         };
         this.undo = function (board) {
             if (moves.length > 0) {
@@ -435,12 +432,16 @@ var movesarr = [];
             moves.splice(0, moves.length);
         };
     }
+    // 歷史紀錄
 
-
-
-    //
-    // View/Control
-    //
+    function ImportData(dts) {
+        var x = [], y = [];
+        for (i = 0; i < dts.split(',').length; i += 2) {
+            x.push(dts.split(',')[i]);
+            y.push(dts.split(',')[i + 1])
+        }
+        console.log(x, y);
+    }
 
     function drawBoardToCanvas(canvas, ctx, board, opt, draggingPeg, drawInvalidHoles) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -450,8 +451,6 @@ var movesarr = [];
         var holeSpanY = opt.holeSpanY;
         var holeRadius = opt.holeRadius;
         var pegRadius = opt.pegRadius;
-
-        // Invalid Holes
         if (drawInvalidHoles) {
             board.eachHole(function (holeId) {
                 if (!board.hasValidHole(holeId)) {
@@ -469,7 +468,7 @@ var movesarr = [];
             }, true);
         }
 
-        // Hole
+        // 洞
         board.eachHole(function (holeId) {
             var holeX = left + board.getHoleLayoutPositionX(holeId) * holeSpanX;
             var holeY = top + board.getHoleLayoutPositionY(holeId) * holeSpanY;
@@ -482,11 +481,13 @@ var movesarr = [];
                 ctx.strokeStyle = "red";
                 ctx.lineWidth = 3;
                 ctx.fillText(holeId, holeX, holeY + 2.5);
+                // 可放置
             }
             else {
                 ctx.strokeStyle = "black";
                 ctx.lineWidth = 1;
                 ctx.fillText(holeId, holeX, holeY + 2.5);
+                // 不可放置
             }
             ctx.stroke();
         });
@@ -511,7 +512,6 @@ var movesarr = [];
             }
         });
     }
-
     mypkg.createCanvasView = createCanvasView;
     function createCanvasView(board) {
         var history = new History();
@@ -572,14 +572,11 @@ var movesarr = [];
             var dstHoleId = INVALID_HOLE_ID;
 
             this.getHoleId = function () { return holeId; };
-            this.setMousePosition = function (pos, dstId) {
-                deltaPos.x = pos.x - initialMousePos.x;
-                deltaPos.y = pos.y - initialMousePos.y;
-                dstHoleId = dstId;
-            };
+            this.setMousePosition = function (pos, dstId) { deltaPos.x = pos.x - initialMousePos.x; deltaPos.y = pos.y - initialMousePos.y; dstHoleId = dstId; };
             this.getDeltaX = function () { return deltaPos.x; };
             this.getDeltaY = function () { return deltaPos.y; };
             this.getDstHoleId = function () { return dstHoleId; };
+
         }
         function mousePosToHoleId(xy, includingInvalidHoles) {
             return board.findHoleAtPosition(
@@ -589,16 +586,11 @@ var movesarr = [];
                 includingInvalidHoles);
         }
         function PlayingMode() {
-            this.leaveMode = function () {
-                this.onMouseLeave();
-            };
+            this.leaveMode = function () { this.onMouseLeave(); };
             this.onMouseDown = function (ev) {
                 var pos = getMouseEventPositionOnElement(canvas, ev);
                 var holeId = mousePosToHoleId(pos);
-                if (board.hasPeg(holeId)) {
-                    draggingPeg = new DraggingPeg(holeId, pos);
-                    update();
-                }
+                if (board.hasPeg(holeId)) { draggingPeg = new DraggingPeg(holeId, pos); update(); }
             };
             this.onMouseMove = function (ev) {
                 if (draggingPeg) {
@@ -611,18 +603,13 @@ var movesarr = [];
             this.onMouseUp = function (ev) {
                 if (draggingPeg) {
                     var dstHoleId = draggingPeg.getDstHoleId();
-                    if (board.hasEmptyHole(dstHoleId)) {
-                        move(draggingPeg.getHoleId(), dstHoleId);
-                    }
+                    if (board.hasEmptyHole(dstHoleId)) { move(draggingPeg.getHoleId(), dstHoleId); }
                     draggingPeg = null;
                     update();
                 }
             };
             this.onMouseLeave = function (ev) {
-                if (draggingPeg) {
-                    draggingPeg = null;
-                    update();
-                }
+                if (draggingPeg) { draggingPeg = null; update(); }
             };
         }
         var MODE_PLAY = "遊玩中";
@@ -631,9 +618,7 @@ var movesarr = [];
         function setMode(modeStr) {
             var modeCtor =
                 modeStr == MODE_PLAY ? PlayingMode : null;
-            if (!modeCtor) {
-                return;
-            }
+            if (!modeCtor) { return; }
             modeObj.leaveMode();
             modeObj = new modeCtor();
             modeName = modeStr;
@@ -644,9 +629,9 @@ var movesarr = [];
         function onMouseMove(ev) { modeObj.onMouseMove(ev); }
         function onMouseUp(ev) { modeObj.onMouseUp(ev); }
         function onMouseLeave(ev) { modeObj.onMouseLeave(ev); }
-        function onTouchStart(ev) { onMouseDown(ev.touches[0]);ev.preventDefault(); }
-        function onTouchMove(ev) { onMouseMove(ev.touches[0]);ev.preventDefault(); }
-        function onTouchEnd(ev) { onMouseUp();ev.preventDefault(); }
+        function onTouchStart(ev) { onMouseDown(ev.touches[0]); ev.preventDefault(); }
+        function onTouchMove(ev) { onMouseMove(ev.touches[0]); ev.preventDefault(); }
+        function onTouchEnd(ev) { onMouseUp(); ev.preventDefault(); }
         canvas.addEventListener("mousedown", onMouseDown, false);
         canvas.addEventListener("mousemove", onMouseMove, false);
         canvas.addEventListener("mouseup", onMouseUp, false);
@@ -693,11 +678,20 @@ var movesarr = [];
         var boardCtors = {};
         var selectBoard = null;
         if (!opt.disableNewGame) {
-            newButton(controlDiv, "重試", newGame); 
+            newButton(controlDiv, "重試", newGame);
         }
         if (!opt.disableUndo) {
             newButton(controlDiv, "撤銷", undo);
         }
+        var ipt = document.createElement('input');
+        ipt.id = 'impipt';
+        controlDiv.appendChild(ipt);
+        var importbtn = document.createElement('button');
+        importbtn.addEventListener('click', () => {
+            ImportData(document.getElementById('impipt').value)
+        });
+        importbtn.innerHTML = '導入'
+        controlDiv.appendChild(importbtn);
 
         // status
 
@@ -718,7 +712,7 @@ var movesarr = [];
         function newBoard(board) {
             if (board) {
                 var newCanvas = createCanvasView(board);
-                (currentCanvas) ? (currentCanvas.parentNode.insertBefore(newCanvas, currentCanvas) ,currentCanvas.parentNode.removeChild(currentCanvas)) : (gameDiv.appendChild(newCanvas))
+                (currentCanvas) ? (currentCanvas.parentNode.insertBefore(newCanvas, currentCanvas), currentCanvas.parentNode.removeChild(currentCanvas)) : (gameDiv.appendChild(newCanvas))
                 currentCanvas = newCanvas;
                 currentCanvas.addEventListener("boardmoved", onBoardMoved, false);
                 updateStatus();
@@ -729,7 +723,7 @@ var movesarr = [];
                 selectBoard ? boardCtors[selectBoard.value] :
                     catalog.length > 0 ? catalog[0].ctor :
                         null;
-            if(document.querySelector('#vh') !== null)document.getElementById('vh').innerHTML = '';
+            if (document.querySelector('#vh') !== null) document.getElementById('vh').innerHTML = '';
             movesarr = [];
             if (creator) {
                 newBoard(creator());
@@ -780,21 +774,4 @@ var movesarr = [];
         button.addEventListener("click", onClick, false);
         return button;
     }
-    function newTextNode(text) {
-        return document.createTextNode(text);
-    }
-    mypkg.getQueryParams = getQueryParams;
-    function getQueryParams() {
-        var result = {};
-        var q = document.location.search.substr(1);
-        if (q.length > 0) {
-            var ps = q.split("&");
-            for (var pi = 0; pi < ps.length; ++pi) {
-                var nv = ps[pi].split("=");
-                result[nv[0]] = decodeURI(nv[1].replace(/\+/g, " "));
-            }
-        }
-        return result;
-    }
-
 })(this);
