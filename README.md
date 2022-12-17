@@ -1,4 +1,4 @@
-### Hi there 👋
+### 嗨 👋
 
 <!--
 **1017-owo/1017-owo** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
