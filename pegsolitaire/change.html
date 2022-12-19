@@ -14,19 +14,15 @@
 <body>
     <div class="inputs">
         <input type="text" placeholder="文字" id="text" />
-        <input type="text" placeholder="選取的文字" id="rex" value="," />
-        <input type="text" placeholder="替換的文字" id="change" value="➔" />
     </div>
     <textarea id="retext"></textarea>
     <script>
         function ttt() {
-            if (text.value && rex.value && change.value) {
-                retext.value = text.value.replace(rex.value, change.value);
+            if (text.value) {
+                retext.value = text.value.replace(/,/gi, '➔');
             }
         }
         text.addEventListener('input', ttt);
-        rex.addEventListener('input', ttt);
-        change.addEventListener('input', ttt);
     </script>
 </body>
 
